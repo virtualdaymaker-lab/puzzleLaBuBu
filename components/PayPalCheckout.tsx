@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
-import { supabase, generateActivationCode } from '../utils/supabase';
+import { supabase, generateActivationCodes } from '../utils/supabase';
 
 interface PayPalCheckoutProps {
-  onSuccess: (code: string) => void;
+  onSuccess: (codes: string[]) => void;
   onCancel?: () => void;
 }
 
@@ -26,8 +26,8 @@ export const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({ onSuccess, onCan
 
   const handleDevPay = async () => {
     // Simulate a successful order locally without writing to Supabase
-    const activationCode = generateActivationCode();
-    onSuccess(activationCode);
+    const activationCodes = generateActivationCodes();
+    onSuccess(activationCodes);
   };
 
   return (
@@ -63,6 +63,9 @@ export const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({ onSuccess, onCan
               </div>
               <p className="text-xs text-gray-600 mt-2">
                 Includes 2 Limited Edition puzzles
+              </p>
+              <p className="text-xs text-red-600 font-semibold mt-2">
+                ⚠️ Final Sale - No Refunds
               </p>
             </div>
 
@@ -105,7 +108,7 @@ export const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({ onSuccess, onCan
                           value: '20.00',
                           currency_code: 'USD',
                         },
-                          description: 'PuzaLabubu - 5 Puzzles (2 Limited Edition)',
+                          description: 'Puza Labubu - 5 Puzzles (2 Limited Edition)',
                       },
                     ],
                   });
@@ -113,20 +116,20 @@ export const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({ onSuccess, onCan
                 onApprove={async (data, actions) => {
                   if (actions.order) {
                     const order = await actions.order.capture();
-                    const activationCode = generateActivationCode();
+                    const activationCodes = generateActivationCodes();
                     
                     // Save to Supabase
                     const { error } = await supabase.from('purchases').insert({
                       email: email.toLowerCase(),
                       paypal_order_id: order.id,
-                      activation_code: activationCode,
-                      used: false,
+                      activation_codes: activationCodes,
+                      device_ids: [],
                       amount: 20.00,
                       status: 'completed',
                     });
 
                     if (!error) {
-                      onSuccess(activationCode);
+                      onSuccess(activationCodes);
                     } else {
                       alert('Payment successful but failed to save. Contact support with order ID: ' + order.id);
                     }

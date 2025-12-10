@@ -17,6 +17,7 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [purchasedCodes, setPurchasedCodes] = useState<string[]>([]);
 
   const handleActivateCode = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,15 +37,23 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
         return;
       }
 
-      // Find purchase with this code
-      const { data: purchase, error: fetchError } = await supabase
+      // Find purchase with this code (search in activation_codes array)
+      const { data: purchases, error: fetchError } = await supabase
         .from('purchases')
         .select('*')
-        .eq('activation_code', cleanCode)
-        .eq('status', 'completed')
-        .single();
+        .eq('status', 'completed');
 
-      if (fetchError || !purchase) {
+      if (fetchError) {
+        setError('Failed to validate. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      const purchase = purchases?.find((p: any) => 
+        p.activation_codes && p.activation_codes.includes(cleanCode)
+      );
+
+      if (!purchase) {
         setError('Invalid activation code');
         setLoading(false);
         return;
@@ -89,9 +98,9 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
     setLoading(false);
   };
 
-  const handlePurchaseSuccess = (activationCode: string) => {
+  const handlePurchaseSuccess = (activationCodes: string[]) => {
     setShowCheckout(false);
-    setCode(activationCode);
+    setPurchasedCodes(activationCodes);
     setShowCodeEntry(true);
   };
 
@@ -160,6 +169,51 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
               </button>
             </div>
           </div>
+        ) : purchasedCodes.length > 0 ? (
+          <div className="space-y-4">
+            <div className="text-center">
+              <h2 className="text-xl font-bold text-gray-800 mb-4" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                Your Activation Codes
+              </h2>
+              <p className="text-sm text-gray-600 mb-6">
+                Each code unlocks the puzzles on up to 2 devices
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              {purchasedCodes.map((purchasedCode, idx) => (
+                <div key={idx} className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <p className="text-xs text-gray-500 mb-1">Code {idx + 1}</p>
+                  <p className="text-lg font-mono font-bold text-center tracking-widest text-gray-800 select-all">
+                    {purchasedCode}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <div className="bg-red-50 border border-red-200 p-4 rounded-lg">
+              <p className="text-xs font-bold text-red-700 mb-1">⚠️ FINAL SALE</p>
+              <p className="text-xs text-red-600">
+                All sales are final. No refunds. Each code works on 2 devices only.
+              </p>
+            </div>
+
+            <button
+              onClick={() => {
+                setCode(purchasedCodes[0]);
+                setShowCodeEntry(false);
+                setPurchasedCodes([]);
+              }}
+              className="w-full py-3 rounded-lg font-bold text-white transition-all hover:scale-105"
+              style={{ backgroundColor: '#b91c1c' }}
+            >
+              Activate Now
+            </button>
+
+            <p className="text-xs text-gray-500 text-center">
+              Save these codes for your records
+            </p>
+          </div>
         ) : (
           <form onSubmit={handleActivateCode} className="space-y-4">
             <div>
@@ -199,23 +253,8 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
               ← Back
             </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                if (code.trim() === '123') {
-                  localStorage.setItem('puzlabu_activated', 'true');
-                  setIsActivated(true);
-                } else {
-                  setError('DEV UNLOCK: Passcode is 123');
-                }
-              }}
-              className="w-full py-2 text-green-700 hover:text-green-900 text-sm border border-green-400 rounded-lg mt-2"
-            >
-              DEV UNLOCK
-            </button>
-
             <p className="text-xs text-gray-500 text-center">
-              This code can be used on up to {MAX_DEVICES} devices
+              Each code can be used on up to {MAX_DEVICES} devices
             </p>
           </form>
         )}

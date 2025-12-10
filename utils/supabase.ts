@@ -9,7 +9,7 @@ export interface Purchase {
   id: string;
   email: string;
   paypal_order_id: string;
-  activation_code: string;
+  activation_codes: string[];
   device_ids: string[];
   amount: number;
   status: 'completed' | 'pending' | 'failed';
@@ -27,4 +27,9 @@ export const generateActivationCode = (): string => {
     code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
   return code;
+};
+
+// Generate 2 codes per purchase
+export const generateActivationCodes = (): string[] => {
+  return [generateActivationCode(), generateActivationCode()];
 };

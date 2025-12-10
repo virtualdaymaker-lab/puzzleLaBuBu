@@ -80,10 +80,10 @@ function App() {
               onClick={() => handleBack()}
             >
               <h1 
-                className="text-xl md:text-2xl font-black text-white tracking-wider uppercase" 
-                style={{ fontFamily: 'Orbitron, sans-serif', letterSpacing: '0.15em' }}
+                className="text-xl md:text-2xl font-black text-white tracking-wider" 
+                style={{ fontFamily: 'Orbitron, sans-serif', letterSpacing: '0.05em' }}
               >
-                PuzaLabubu
+                Puza Labubu
               </h1>
             </div>
           </div>

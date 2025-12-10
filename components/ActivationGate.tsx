@@ -27,6 +27,15 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
       const deviceId = await getDeviceId();
       const cleanCode = code.toUpperCase().replace(/\s/g, '');
 
+      // DEV MODE: Allow test code 1234
+      if (isDevMode && cleanCode === '1234') {
+        localStorage.setItem('puzlabu_activated', 'true');
+        localStorage.setItem('puzlabu_device_id', deviceId);
+        setIsActivated(true);
+        setLoading(false);
+        return;
+      }
+
       // Find purchase with this code
       const { data: purchase, error: fetchError } = await supabase
         .from('purchases')
@@ -113,8 +122,8 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
       )}
       <div className="w-full max-w-md">
         <div className="px-4 py-2 rounded-lg mb-8 text-center" style={{ backgroundColor: '#b91c1c' }}>
-          <h1 className="text-2xl font-black text-white tracking-wider uppercase" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-            PuzaLabubu
+          <h1 className="text-2xl font-black text-white tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+            Puza Labubu
           </h1>
         </div>
 

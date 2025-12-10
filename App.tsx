@@ -1,14 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PuzzleMenu } from './components/PuzzleMenu';
 import { PuzzleBoard } from './components/PuzzleBoard';
-import { Flyers } from './components/Flyers';
+import { PaymentVerify } from './components/PaymentVerify';
 import { PuzzleImage } from './types';
 
-type View = 'menu' | 'puzzle' | 'flyers';
+type View = 'menu' | 'puzzle';
 
 function App() {
   const [activePuzzle, setActivePuzzle] = useState<PuzzleImage | null>(null);
   const [currentView, setCurrentView] = useState<View>('menu');
+  const [isVerified, setIsVerified] = useState(false);
+  const [verifiedEmail, setVerifiedEmail] = useState('');
+
+  // Check if user is already verified on this device
+  useEffect(() => {
+    const storedEmail = localStorage.getItem('puzlabu_verified_email');
+    const storedDevice = localStorage.getItem('puzlabu_verified_device');
+    const deviceId = localStorage.getItem('puzlabu_device_id');
+
+    // Simple verification check
+    if (storedEmail && storedDevice === deviceId) {
+      setIsVerified(true);
+      setVerifiedEmail(storedEmail);
+    }
+  }, []);
+
+  const handleVerified = (email: string) => {
+    setIsVerified(true);
+    setVerifiedEmail(email);
+  };
 
   const handleSelectPuzzle = (img: PuzzleImage) => {
     setActivePuzzle(img);
@@ -19,6 +39,11 @@ function App() {
     setActivePuzzle(null);
     setCurrentView('menu');
   };
+
+  // If not verified, show verification screen
+  if (!isVerified) {
+    return <PaymentVerify onVerified={handleVerified} />;
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center bg-white">
@@ -38,13 +63,7 @@ function App() {
               PuzLabu
             </h1>
           </div>
-          <button
-            onClick={() => setCurrentView('flyers')}
-            className="text-xs md:text-sm px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all tracking-wider uppercase font-semibold"
-            style={{ fontFamily: 'Orbitron, sans-serif' }}
-          >
-            Flyers
-          </button>
+          <div className="w-24"></div>
         </div>
       </header>
 
@@ -55,8 +74,6 @@ function App() {
             image={activePuzzle} 
             onBack={handleBack} 
           />
-        ) : currentView === 'flyers' ? (
-          <Flyers onBack={handleBack} />
         ) : (
           <PuzzleMenu 
             onSelect={handleSelectPuzzle} 

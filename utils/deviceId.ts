@@ -5,7 +5,7 @@ export const getDeviceId = async (): Promise<string> => {
   if (ctx) {
     ctx.textBaseline = 'top';
     ctx.font = '14px Arial';
-    ctx.fillText('PuzLabu', 2, 2);
+    ctx.fillText('PuzaLabubu', 2, 2);
   }
   const canvasData = canvas.toDataURL();
   

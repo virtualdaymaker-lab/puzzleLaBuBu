@@ -12,6 +12,7 @@ Quick orientation
 - Entry point: `index.html` -> `index.tsx` -> `App.tsx` (top-level routes/views).
 - Main components: `components/PuzzleMenu.tsx`, `components/PuzzleBoard.tsx`, `components/ActivationGate.tsx`.
 - Utilities: `utils/supabase.ts` (Supabase client + activation code generator), `utils/deviceId.ts` (client device fingerprinting).
+ - Utilities: `utils/supabase.ts` (Supabase client + activation code generator), `utils/deviceId.ts` (client device fingerprinting).
 - Static assets: `public/images/*` (puzzle images) — follow the naming documented in `public/images/README.txt`.
 
 Build & local workflow
@@ -25,6 +26,7 @@ Vercel deployment specifics (common cause of blank page)
 - Ensure environment variables (Vite naming) are configured in Vercel: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_PAYPAL_CLIENT_ID`, `VITE_PAYPAL_SECRET`, and `GEMINI_API_KEY` (vite config maps GEMINI into runtime `process.env.GEMINI_API_KEY`).
 - Verify branch and commit in Vercel dashboard: compare `git rev-parse HEAD` SHA to the Vercel deployment commit SHA for the latest deploy.
 - If the deployed site is blank: open DevTools -> Console and Network logs for errors such as missing `dist` or runtime errors (`ReferenceError`, `TypeError`, or a script failing to load). Export and paste logs in PRs if you need help diagnosing.
+ - For local development you can enable `VITE_DEV_MODE=true` to test without contacting PayPal or Supabase: this enables "DEV: Skip Activation" in the activation gate and a "Simulate Payment (DEV)" button in the PayPal modal.
 
 Repository-specific patterns & gotchas
 - Environment variables: Almost all runtime config uses `import.meta.env` for `VITE_*` prefixed values (see `utils/supabase.ts`, `components/PayPalCheckout.tsx`). Some code uses `process.env.REACT_APP_GOOGLE_CLIENT_ID` directly (in `components/GoogleAuth.tsx`) which is non-standard for Vite — prefer `VITE_GOOGLE_CLIENT_ID` and `import.meta.env.VITE_GOOGLE_CLIENT_ID` if changing.

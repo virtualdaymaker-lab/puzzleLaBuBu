@@ -88,14 +88,14 @@ export const GoogleAuth: React.FC<GoogleAuthProps> = ({ onAuthenticated }) => {
       <div className="w-full max-w-md">
         <div className="px-4 py-2 rounded-lg mb-8 text-center" style={{ backgroundColor: '#b91c1c' }}>
           <h1 className="text-2xl font-black text-white tracking-wider uppercase" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-            PuzLabu
+            PuzaLabubu
           </h1>
         </div>
 
         <div className="flex flex-col gap-6">
           <div>
             <h2 className="text-xl font-bold text-gray-800 text-center mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-              Welcome to PuzLabu
+              Welcome to PuzaLabubu
             </h2>
             <p className="text-sm text-gray-600 text-center">
               Sign in with Google to save your progress to your account and access features across devices.

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Button } from './Button';
+import { MAX_DEVICES } from '../utils/supabase';
 
 interface PaymentVerifyProps {
   onVerified: (email: string) => void;
@@ -94,7 +95,7 @@ export const PaymentVerify: React.FC<PaymentVerifyProps> = ({ onVerified }) => {
       <div className="w-full max-w-md">
         <div className="px-4 py-2 rounded-lg mb-8 text-center" style={{ backgroundColor: '#b91c1c' }}>
           <h1 className="text-2xl font-black text-white tracking-wider uppercase" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-            PuzLabu
+            PuzaLabubu
           </h1>
         </div>
 
@@ -163,7 +164,7 @@ export const PaymentVerify: React.FC<PaymentVerifyProps> = ({ onVerified }) => {
         )}
 
         <p className="text-xs text-gray-500 text-center mt-6">
-          This device will be locked to your email. Only you can play on this device.
+          This device will be locked to your email. Each purchase allows use on up to {MAX_DEVICES} devices.
         </p>
       </div>
     </div>

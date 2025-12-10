@@ -83,7 +83,7 @@ function App() {
                 className="text-xl md:text-2xl font-black text-white tracking-wider uppercase" 
                 style={{ fontFamily: 'Orbitron, sans-serif', letterSpacing: '0.15em' }}
               >
-                PuzLabu
+                PuzaLabubu
               </h1>
             </div>
           </div>

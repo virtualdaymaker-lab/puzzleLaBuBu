@@ -22,6 +22,14 @@ export const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({ onSuccess, onCan
     setShowPayPal(true);
   };
 
+  const isDevMode = import.meta.env.VITE_DEV_MODE === 'true';
+
+  const handleDevPay = async () => {
+    // Simulate a successful order locally without writing to Supabase
+    const activationCode = generateActivationCode();
+    onSuccess(activationCode);
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg p-6 max-w-md w-full">
@@ -97,7 +105,7 @@ export const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({ onSuccess, onCan
                           value: '20.00',
                           currency_code: 'USD',
                         },
-                        description: 'PuzLabu - 5 Puzzles (2 Limited Edition)',
+                          description: 'PuzaLabubu - 5 Puzzles (2 Limited Edition)',
                       },
                     ],
                   });
@@ -132,6 +140,16 @@ export const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({ onSuccess, onCan
                   alert('Payment failed. Please try again.');
                 }}
               />
+
+              {isDevMode && (
+                <button
+                  type="button"
+                  onClick={handleDevPay}
+                  className="w-full py-2 bg-yellow-500 rounded-lg text-black font-bold"
+                >
+                  Simulate Payment (DEV)
+                </button>
+              )}
 
               <button
                 type="button"

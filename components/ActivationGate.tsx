@@ -86,6 +86,15 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
     setShowCodeEntry(true);
   };
 
+  const isDevMode = import.meta.env.VITE_DEV_MODE === 'true';
+
+  const handleDevSkip = () => {
+    if (isDevMode) {
+      localStorage.setItem('puzlabu_activated', 'true');
+      setIsActivated(true);
+    }
+  };
+
   if (isActivated) {
     return <>{children}</>;
   }
@@ -95,7 +104,7 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
       <div className="w-full max-w-md">
         <div className="px-4 py-2 rounded-lg mb-8 text-center" style={{ backgroundColor: '#b91c1c' }}>
           <h1 className="text-2xl font-black text-white tracking-wider uppercase" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-            PuzLabu
+            PuzaLabubu
           </h1>
         </div>
 
@@ -198,6 +207,17 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
           onSuccess={handlePurchaseSuccess}
           onCancel={() => setShowCheckout(false)}
         />
+      )}
+
+      {isDevMode && (
+        <div className="fixed bottom-8 right-8">
+          <button
+            onClick={handleDevSkip}
+            className="px-3 py-2 rounded-lg text-xs bg-green-400 text-black font-bold"
+          >
+            DEV: Skip Activation
+          </button>
+        </div>
       )}
 
       {/* Dev-only navigation buttons (visible only in dev builds) */}

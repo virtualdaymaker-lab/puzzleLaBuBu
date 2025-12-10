@@ -39,7 +39,7 @@ Suggested debugging steps when Vercel shows a blank page
 1. Confirm commit was pushed: `git rev-parse HEAD` -> checkout in Vercel’s dashboard build logs (should match).
 2. Open Vercel Deployments -> Deployment logs. Look for build failures, warnings about missing files (e.g. `/index.css` missing), or environment variable errors.
 3. Check that Output Directory is `dist` (Vite default). Vercel sometimes defaults to `public` for some frameworks — that will give a blank page.
-4. If build succeeded but page is blank, open browser DevTools console for runtime errors caused by undefined globals (window.google is used for optional Google sign-in) or missing env variables.
+4. If build succeeded but page is blank, open the browser DevTools console for runtime errors caused by missing env variables, missing files, or other runtime exceptions.
 5. If there are 404s for `index.css` or assets that were not built, ensure `/index.css` is intentionally omitted or included — Vite won't generate a file missing from the source; if the project needs an `index.css` file, add it to the root or update references.
 6. Redeploy: from Vercel UI redeploy the latest commit (or `vercel` CLI), confirm a new deployment and check build logs.
 

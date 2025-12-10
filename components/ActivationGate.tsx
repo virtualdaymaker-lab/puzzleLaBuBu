@@ -101,6 +101,16 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white p-4">
+      {isDevMode && !isActivated && (
+        <div className="absolute top-4 left-4">
+          <button
+            onClick={handleDevSkip}
+            className="px-4 py-2 rounded-lg text-xs bg-blue-500 text-white font-bold hover:bg-blue-600 transition"
+          >
+            Bypass Activation (DEV)
+          </button>
+        </div>
+      )}
       <div className="w-full max-w-md">
         <div className="px-4 py-2 rounded-lg mb-8 text-center" style={{ backgroundColor: '#b91c1c' }}>
           <h1 className="text-2xl font-black text-white tracking-wider uppercase" style={{ fontFamily: 'Orbitron, sans-serif' }}>
@@ -210,13 +220,21 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
       )}
 
       {isDevMode && (
-        <div className="fixed bottom-8 right-8">
+        <div className="fixed bottom-8 right-8 flex flex-col gap-2">
           <button
             onClick={handleDevSkip}
-            className="px-3 py-2 rounded-lg text-xs bg-green-400 text-black font-bold"
+            className="px-3 py-2 rounded-lg text-xs bg-green-400 text-black font-bold hover:bg-green-500"
           >
             DEV: Skip Activation
           </button>
+          {!isActivated && (
+            <button
+              onClick={handleDevSkip}
+              className="px-4 py-2 rounded-lg text-xs bg-blue-500 text-white font-bold hover:bg-blue-600 transition"
+            >
+              Bypass Activation
+            </button>
+          )}
         </div>
       )}
 

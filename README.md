@@ -21,9 +21,9 @@ View your app in AI Studio: https://ai.studio/apps/temp/1
 - `VITE_SUPABASE_URL` — Supabase project URL
 - `VITE_SUPABASE_ANON_KEY` — Supabase anon key
 - `VITE_PAYPAL_CLIENT_ID`, `VITE_PAYPAL_SECRET` — PayPal config
-- `VITE_GOOGLE_CLIENT_ID` — To enable Google Sign-In (if you use the optional sign in flow).
+Note: Google Sign-In has been removed from this project. If you re-enable it in the future, add `VITE_GOOGLE_CLIENT_ID`.
    - `VITE_DEV_MODE` — Set to `true` locally to enable development shortcuts (DEV Skip Activation and Simulate Payment) so you can test the UI without writing production purchase data.
 
-Note: Use the `VITE_` prefix (e.g. `VITE_GOOGLE_CLIENT_ID`) so Vite exposes these variables to client code using `import.meta.env`.
+Note: Use the `VITE_` prefix so Vite exposes these variables to client code using `import.meta.env`.
 3. Run the app:
    `npm run dev`

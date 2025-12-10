@@ -1,0 +1,12 @@
+/* Minimal index.css placeholder
+   This file is referenced by index.html and avoids a 404 at runtime.
+   The project uses Tailwind via CDN in `index.html`, but some hosting
+   setups warn/fail on 404s for referenced files. Keep minimal styles here.
+*/
+html, body, #root {
+  height: 100%;
+}
+body {
+  margin: 0;
+  background-color: #ffffff;
+}

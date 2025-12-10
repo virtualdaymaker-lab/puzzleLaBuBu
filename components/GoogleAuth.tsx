@@ -32,7 +32,7 @@ export const GoogleAuth: React.FC<GoogleAuthProps> = ({ onAuthenticated }) => {
     script.onload = () => {
       if (window.google) {
         window.google.accounts.id.initialize({
-          client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
           callback: handleCredentialResponse,
         });
         
@@ -98,7 +98,7 @@ export const GoogleAuth: React.FC<GoogleAuthProps> = ({ onAuthenticated }) => {
               Welcome to PuzLabu
             </h2>
             <p className="text-sm text-gray-600 text-center">
-              Sign in with Google to save your progress to your Google Drive. Your game, your way.
+              Sign in with Google to save your progress to your account and access features across devices.
             </p>
           </div>
 
@@ -113,7 +113,7 @@ export const GoogleAuth: React.FC<GoogleAuthProps> = ({ onAuthenticated }) => {
           )}
 
           <p className="text-xs text-gray-500 text-center">
-            Your game progress will be automatically saved to your Google Drive and synced across all your devices.
+            Your game progress will be saved to your account so you can sign in locally and continue where you left off.
           </p>
         </div>
       </div>

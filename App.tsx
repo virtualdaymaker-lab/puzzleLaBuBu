@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { PuzzleMenu } from './components/PuzzleMenu';
 import { PuzzleBoard } from './components/PuzzleBoard';
 import { ActivationGate } from './components/ActivationGate';
+import { PUZZLE_IMAGES } from './constants';
 import { PuzzleImage } from './types';
 
 type View = 'menu' | 'puzzle';
@@ -19,6 +20,52 @@ function App() {
     setActivePuzzle(null);
     setCurrentView('menu');
   };
+
+  // Dev-only: allow a quick navigator via localStorage for development
+  React.useEffect(() => {
+    try {
+      const devNav = localStorage.getItem('puzlabu_dev_nav');
+      if (!devNav) return;
+      if (devNav === 'menu') {
+        setActivePuzzle(null);
+        setCurrentView('menu');
+      } else if (devNav.startsWith('puzzle:')) {
+        const id = devNav.split(':')[1];
+        const img = PUZZLE_IMAGES.find(i => i.id === id) || PUZZLE_IMAGES[0];
+        setActivePuzzle(img);
+        setCurrentView('puzzle');
+      }
+      // Clear after use
+      localStorage.removeItem('puzlabu_dev_nav');
+    } catch (e) {
+      // no-op
+    }
+  }, []);
+
+  // Listen for dev nav events emitted by the ActivationGate (dev-only)
+  React.useEffect(() => {
+    const handler = () => {
+      try {
+        const devNav = localStorage.getItem('puzlabu_dev_nav');
+        if (!devNav) return;
+        if (devNav === 'menu') {
+          setActivePuzzle(null);
+          setCurrentView('menu');
+        } else if (devNav.startsWith('puzzle:')) {
+          const id = devNav.split(':')[1];
+          const img = PUZZLE_IMAGES.find(i => i.id === id) || PUZZLE_IMAGES[0];
+          setActivePuzzle(img);
+          setCurrentView('puzzle');
+        }
+        localStorage.removeItem('puzlabu_dev_nav');
+      } catch (e) {
+        // no-op
+      }
+    };
+
+    window.addEventListener('puzlabu:dev-nav', handler);
+    return () => window.removeEventListener('puzlabu:dev-nav', handler);
+  }, []);
 
   return (
     <ActivationGate>

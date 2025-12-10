@@ -15,6 +15,14 @@ View your app in AI Studio: https://ai.studio/apps/temp/1
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+2. Set the environment variables needed for local development and Vercel deployment in `.env.local`:
+
+- `GEMINI_API_KEY` — used by `vite.config.ts` to expose `process.env.GEMINI_API_KEY`.
+- `VITE_SUPABASE_URL` — Supabase project URL
+- `VITE_SUPABASE_ANON_KEY` — Supabase anon key
+- `VITE_PAYPAL_CLIENT_ID`, `VITE_PAYPAL_SECRET` — PayPal config
+- `VITE_GOOGLE_CLIENT_ID` — To enable Google Sign-In (if you use the optional sign in flow).
+
+Note: Use the `VITE_` prefix (e.g. `VITE_GOOGLE_CLIENT_ID`) so Vite exposes these variables to client code using `import.meta.env`.
 3. Run the app:
    `npm run dev`

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { PUZZLE_IMAGES } from '../constants';
 import { supabase, MAX_DEVICES } from '../utils/supabase';
 import { getDeviceId } from '../utils/deviceId';
 import { PayPalCheckout } from './PayPalCheckout';
@@ -197,6 +198,51 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
           onSuccess={handlePurchaseSuccess}
           onCancel={() => setShowCheckout(false)}
         />
+      )}
+
+      {/* Dev-only navigation buttons (visible only in dev builds) */}
+      {import.meta.env.DEV && (
+        <div className="fixed bottom-4 right-4 flex flex-col gap-2 z-50">
+          <button
+            onClick={() => {
+              // Activate and navigate to menu
+              localStorage.setItem('puzlabu_activated', 'true');
+              localStorage.setItem('puzlabu_dev_nav', 'menu');
+              // Notify App to handle dev nav
+              window.dispatchEvent(new Event('puzlabu:dev-nav'));
+            }}
+            className="bg-gray-800 text-white px-3 py-2 rounded shadow"
+            title="DEV: Open Menu"
+          >
+            DEV: Menu
+          </button>
+
+          <button
+            onClick={() => {
+              // Activate and open first puzzle
+              localStorage.setItem('puzlabu_activated', 'true');
+              const firstPuzzle = (PUZZLE_IMAGES && PUZZLE_IMAGES[0]) ? PUZZLE_IMAGES[0].id : 'lpbb1';
+              localStorage.setItem('puzlabu_dev_nav', `puzzle:${firstPuzzle}`);
+              window.dispatchEvent(new Event('puzlabu:dev-nav'));
+            }}
+            className="bg-gray-800 text-white px-3 py-2 rounded shadow"
+            title="DEV: Open First Puzzle"
+          >
+            DEV: Puzzle 1
+          </button>
+
+          <button
+            onClick={() => {
+              // Activate only
+              localStorage.setItem('puzlabu_activated', 'true');
+              window.dispatchEvent(new Event('puzlabu:dev-nav'));
+            }}
+            className="bg-green-600 text-white px-3 py-2 rounded shadow"
+            title="DEV: Activate"
+          >
+            DEV: Activate
+          </button>
+        </div>
       )}
     </div>
   );

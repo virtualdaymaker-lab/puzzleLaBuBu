@@ -207,6 +207,7 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
             onClick={() => {
               // Activate and navigate to menu
               localStorage.setItem('puzlabu_activated', 'true');
+              setIsActivated(true);
               localStorage.setItem('puzlabu_dev_nav', 'menu');
               // Notify App to handle dev nav
               window.dispatchEvent(new Event('puzlabu:dev-nav'));
@@ -221,6 +222,7 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
             onClick={() => {
               // Activate and open first puzzle
               localStorage.setItem('puzlabu_activated', 'true');
+              setIsActivated(true);
               const firstPuzzle = (PUZZLE_IMAGES && PUZZLE_IMAGES[0]) ? PUZZLE_IMAGES[0].id : 'lpbb1';
               localStorage.setItem('puzlabu_dev_nav', `puzzle:${firstPuzzle}`);
               window.dispatchEvent(new Event('puzlabu:dev-nav'));
@@ -235,6 +237,7 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
             onClick={() => {
               // Activate only
               localStorage.setItem('puzlabu_activated', 'true');
+              setIsActivated(true);
               window.dispatchEvent(new Event('puzlabu:dev-nav'));
             }}
             className="bg-green-600 text-white px-3 py-2 rounded shadow"

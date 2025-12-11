@@ -171,21 +171,29 @@ export const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({ onSuccess, onCan
                   if (actions.order) {
                     const order = await actions.order.capture();
                     const activationCodes = generateActivationCodes();
-                    
-                    // Save to Supabase
-                    const { error } = await supabase.from('purchases').insert({
-                      email: email.toLowerCase(),
-                      paypal_order_id: order.id,
+                    // Ensure all required fields for Supabase insert
+                    const purchaseData = {
+                      email: email ? email.toLowerCase() : '',
+                      paypal_order_id: order.id || '',
                       activation_codes: activationCodes,
                       device_ids: [],
                       amount: 20.00,
                       status: 'completed',
-                    });
-
-                    if (!error) {
+                      created_at: new Date().toISOString(), // Add timestamp for Supabase
+                    };
+                    let supabaseError = null;
+                    try {
+                      const { error } = await supabase.from('purchases').insert([purchaseData]);
+                      supabaseError = error;
+                    } catch (err) {
+                      supabaseError = err;
+                    }
+                    // Always show codes, even if Supabase fails
+                    if (!supabaseError) {
                       onSuccess(activationCodes);
                     } else {
-                      alert('Payment successful but failed to save. Contact support with order ID: ' + order.id);
+                      alert('Payment successful but failed to save purchase. Your activation codes are shown below. Please contact support with your PayPal order ID if you need help.');
+                      onSuccess(activationCodes);
                     }
                   }
                 }}

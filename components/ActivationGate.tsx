@@ -3,6 +3,8 @@ import { PUZZLE_IMAGES } from '../constants';
 import { supabase, MAX_DEVICES, generateActivationCodes } from '../utils/supabase';
 import { getDeviceId } from '../utils/deviceId';
 import { PayPalCheckout } from './PayPalCheckout';
+import { sendActivationEmail } from '../utils/sendEmail';
+import axios from 'axios';
 
 interface ActivationGateProps {
   children: React.ReactNode;
@@ -110,6 +112,7 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
       }
 
       // DEV MODE: Allow test code 1234
+      const isDevMode = typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_DEV_MODE === 'true';
       if (isDevMode && cleanCode === '1234') {
         localStorage.setItem('puzlabu_activated', 'true');
         localStorage.setItem('puzlabu_device_id', deviceId);
@@ -265,14 +268,26 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
                   </p>
                   <button
                     className="mt-2 w-full py-2 bg-blue-500 text-white rounded text-sm font-bold hover:bg-blue-600"
-                    onClick={() => {
+                    onClick={async () => {
                       const userEmail = email || window.prompt('Enter your email to send code:', email);
                       if (!userEmail || !userEmail.includes('@')) {
                         alert('Please enter a valid email address.');
                         return;
                       }
-                      // TODO: Implement email sending logic here
-                      alert(`Code will be sent to ${userEmail} with instructions.\n\nNo refunds. Each code works on 2 devices only.`);
+                      // Send activation code via backend API
+                      try {
+                        const result = await axios.post('/api/send-activation-email', {
+                          to: userEmail,
+                          code: purchasedCode,
+                        });
+                        if (result.data && result.data.success) {
+                          alert(`Code sent to ${userEmail} with instructions.\n\nNo refunds. Each code works on 2 devices only.`);
+                        } else {
+                          alert(`Failed to send email: ${result.data.error || 'Unknown error'}`);
+                        }
+                      } catch (err) {
+                        alert(`Failed to send email: ${err.message}`);
+                      }
                     }}
                   >
                     Send to Email
@@ -288,9 +303,25 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
             </div>
             <button
               onClick={() => {
-                setCode(purchasedCodes[0]);
-                setShowCodeEntry(false);
+                setShowCodeEntry(true);
                 setPurchasedCodes([]);
+                setCode('');
+                setError('');
+                setEmail('');
+                setPassword('');
+              }}
+              className="w-full py-2 text-gray-600 hover:text-gray-800 text-sm"
+            >
+              I have a code
+            </button>
+            <button
+              onClick={() => {
+                setShowCodeEntry(true);
+                setCode(purchasedCodes[0] || '');
+                setPurchasedCodes([]);
+                setError('');
+                setEmail('');
+                setPassword('');
               }}
               className="w-full py-3 rounded-lg font-bold text-white transition-all hover:scale-105"
               style={{ backgroundColor: '#b91c1c' }}
@@ -508,14 +539,26 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
                   </p>
                   <button
                     className="mt-2 w-full py-2 bg-blue-500 text-white rounded text-sm font-bold hover:bg-blue-600"
-                    onClick={() => {
+                    onClick={async () => {
                       const userEmail = email || window.prompt('Enter your email to send code:', email);
                       if (!userEmail || !userEmail.includes('@')) {
                         alert('Please enter a valid email address.');
                         return;
                       }
-                      // TODO: Implement email sending logic here
-                      alert(`Code will be sent to ${userEmail} with instructions.\n\nNo refunds. Each code works on 2 devices only.`);
+                      // Send activation code via backend API
+                      try {
+                        const result = await axios.post('/api/send-activation-email', {
+                          to: userEmail,
+                          code: purchasedCode,
+                        });
+                        if (result.data && result.data.success) {
+                          alert(`Code sent to ${userEmail} with instructions.\n\nNo refunds. Each code works on 2 devices only.`);
+                        } else {
+                          alert(`Failed to send email: ${result.data.error || 'Unknown error'}`);
+                        }
+                      } catch (err) {
+                        alert(`Failed to send email: ${err.message}`);
+                      }
                     }}
                   >
                     Send to Email
@@ -533,16 +576,31 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
 
             <button
               onClick={() => {
-                setCode(purchasedCodes[0]);
-                setShowCodeEntry(false);
+                setShowCodeEntry(true);
                 setPurchasedCodes([]);
+                setCode('');
+                setError('');
+                setEmail('');
+                setPassword('');
+              }}
+              className="w-full py-2 text-gray-600 hover:text-gray-800 text-sm"
+            >
+              I have a code
+            </button>
+            <button
+              onClick={() => {
+                setShowCodeEntry(true);
+                setCode(purchasedCodes[0] || '');
+                setPurchasedCodes([]);
+                setError('');
+                setEmail('');
+                setPassword('');
               }}
               className="w-full py-3 rounded-lg font-bold text-white transition-all hover:scale-105"
               style={{ backgroundColor: '#b91c1c' }}
             >
               Activate Now
             </button>
-
             <p className="text-xs text-gray-500 text-center">
               Save these codes for your records
             </p>
@@ -554,7 +612,6 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
                 Enter Activation Code
               </h2>
             </div>
-
             <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-4">
               <p className="text-sm text-blue-700 mb-2">Test Mode: Get codes by email</p>
               <form onSubmit={handleGetCodes} className="space-y-3">
@@ -583,7 +640,6 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
                 </button>
               </form>
             </div>
-
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300"></div>
@@ -592,7 +648,6 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
                 <span className="px-2 bg-white text-gray-500">Or enter code manually</span>
               </div>
             </div>
-
             <form onSubmit={handleActivateCode} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">

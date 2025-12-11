@@ -13,6 +13,8 @@
     "@supabase/supabase-js": "^2.87.1",
     "@tailwindcss/postcss": "^4.1.17",
     "@tailwindcss/vite": "^4.1.17",
+    "axios": "^1.13.2",
+    "nodemailer": "^7.0.11",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
   },

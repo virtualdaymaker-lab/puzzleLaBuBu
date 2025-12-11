@@ -93,17 +93,15 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
       const deviceId = await getDeviceId();
       const cleanCode = code.toUpperCase().replace(/\s/g, '');
+      const userEmail = email.trim().toLowerCase();
 
       // Special handling for test user - passcode 123 resets every time
       if (cleanCode === '123') {
-        // Reset activation for testing
         localStorage.removeItem('puzlabu_activated');
         localStorage.removeItem('puzlabu_device_id');
-        // Then activate
         localStorage.setItem('puzlabu_activated', 'true');
         localStorage.setItem('puzlabu_device_id', deviceId);
         setIsActivated(true);
@@ -120,6 +118,7 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
         setLoading(false);
         return;
       }
+
       const { data: purchases, error: fetchError } = await supabase
         .from('purchases')
         .select('*')
@@ -131,19 +130,19 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
         return;
       }
 
-      const purchase = purchases?.find((p: any) => 
-        p.activation_codes && p.activation_codes.includes(cleanCode)
+      // Find purchase by code and email
+      const purchase = purchases?.find((p: any) =>
+        p.activation_codes && p.activation_codes.includes(cleanCode) &&
+        p.email && p.email.trim().toLowerCase() === userEmail
       );
 
       if (!purchase) {
-        setError('Invalid activation code');
+        setError('Activation code and email do not match any purchase.');
         setLoading(false);
         return;
       }
 
       const deviceIds = purchase.device_ids || [];
-
-      // Check if device already activated
       if (deviceIds.includes(deviceId)) {
         localStorage.setItem('puzlabu_activated', 'true');
         localStorage.setItem('puzlabu_device_id', deviceId);
@@ -151,29 +150,27 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
         setLoading(false);
         return;
       }
-
-      // Check device limit
       if (deviceIds.length >= MAX_DEVICES) {
         setError(`This code has been used on ${MAX_DEVICES} devices already`);
         setLoading(false);
         return;
       }
-
-      // Add device
       const { error: updateError } = await supabase
         .from('purchases')
         .update({ device_ids: [...deviceIds, deviceId] })
         .eq('id', purchase.id);
-
       if (updateError) {
         setError('Failed to activate. Please try again.');
         setLoading(false);
         return;
       }
-
       localStorage.setItem('puzlabu_activated', 'true');
       localStorage.setItem('puzlabu_device_id', deviceId);
       setIsActivated(true);
+      // Send confirmation email
+      try {
+        await sendActivationEmail(userEmail, cleanCode);
+      } catch {}
     } catch (err) {
       setError('Something went wrong. Please try again.');
     }
@@ -240,6 +237,13 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
                 style={{ backgroundColor: '#b91c1c' }}
               >
                 Buy Now
+              </button>
+              <button
+                onClick={() => setShowCodeEntry(true)}
+                className="w-full py-2 text-blue-600 hover:text-blue-800 text-sm border border-blue-200 rounded mb-1"
+                style={{ backgroundColor: '#f0f9ff' }}
+              >
+                Enter Code / Unlock All
               </button>
               <button
                 onClick={() => setShowCheckout(true)}
@@ -389,8 +393,21 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
                   maxLength={14}
                   required
                 />
-                {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Used for Purchase
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-center text-lg"
+                  placeholder="your@email.com"
+                  required
+                />
+              </div>
+              {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
               <button
                 type="submit"
                 disabled={loading}
@@ -662,9 +679,21 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
                   maxLength={14}
                   required
                 />
-                {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
               </div>
-
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email Used for Purchase
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-center text-lg"
+                  placeholder="your@email.com"
+                  required
+                />
+              </div>
+              {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
               <button
                 type="submit"
                 disabled={loading}
@@ -673,7 +702,6 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
               >
                 {loading ? 'Activating...' : 'Activate'}
               </button>
-
               <button
                 type="button"
                 onClick={() => {
@@ -687,7 +715,6 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
               >
                 ← Back
               </button>
-
               <p className="text-xs text-gray-500 text-center">
                 Each code can be used on up to {MAX_DEVICES} devices
               </p>

@@ -197,21 +197,26 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
           </h1>
         </div>
         {showDemo && (
-          <div className="mb-6 bg-white p-4 rounded-lg border border-transparent">
-            <div className="text-center mb-4">
-              <h3 className="text-lg font-bold text-gray-800 mb-2">All 6 Puzzles</h3>
-              <p className="text-sm text-gray-600">Including 2 Limited Editions</p>
+          <div className="mb-6 bg-white p-6 rounded-xl border border-gray-200 shadow-lg">
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-extrabold text-gray-900 mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>All 5 Puzzles</h3>
+              <p className="text-base text-gray-600">Professional preview. Limited Editions are clearly labeled.</p>
             </div>
-            <div className="grid grid-cols-3 gap-3" style={{ background: '#fff', zIndex: 1 }}>
-              {PUZZLE_IMAGES.map(puzzle => (
-                <div key={puzzle.id} className="text-center">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+              {PUZZLE_IMAGES.slice(0,5).map(puzzle => (
+                <div key={puzzle.id} className="flex flex-col items-center">
                   <div
-                    className="w-16 h-16 mx-auto mb-2 rounded-lg border-2 flex items-center justify-center overflow-hidden"
+                    className="w-24 h-24 mb-3 rounded-xl border-4 flex items-center justify-center overflow-hidden shadow"
                     style={{ backgroundColor: puzzle.bgColor, borderColor: puzzle.color === 'purple' ? '#8b5cf6' : puzzle.color === 'red' ? '#ef4444' : puzzle.color === 'amber' ? '#f59e0b' : puzzle.color === 'yellow' ? '#eab308' : '#6b7280' }}
                   >
-                    <img src={puzzle.url} alt={puzzle.name} className="w-full h-full object-cover" style={{ opacity: 1 }} />
+                    <img src={puzzle.url} alt={puzzle.name} className="w-full h-full object-cover" />
                   </div>
-                  <p className="text-xs font-medium text-gray-700">{puzzle.name}</p>
+                  <div className="flex flex-col items-center">
+                    <span className="text-base font-semibold text-gray-800 mb-1">{puzzle.name.replace('⭐ ', '')}</span>
+                    {puzzle.name.includes('Limited Edition') && (
+                      <span className="px-2 py-0.5 text-xs font-bold rounded bg-purple-100 text-purple-700 border border-purple-300">LIMITED EDITION</span>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

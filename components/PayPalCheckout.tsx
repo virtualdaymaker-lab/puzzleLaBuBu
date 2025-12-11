@@ -67,14 +67,14 @@ export const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({ onSuccess, onCan
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+    <div className="fixed inset-0 bg-transparent flex items-center justify-center p-4 z-50">
       {/* Floating background images */}
       {floatingImages.map(img => (
         <img
           key={img.id}
           src={img.image}
           alt=""
-          className="absolute opacity-20 pointer-events-none"
+          className="absolute opacity-100 pointer-events-none"
           style={{
             left: `${img.x}%`,
             top: `${img.y}%`,

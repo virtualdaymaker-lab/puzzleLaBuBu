@@ -1,34 +1,39 @@
 // api/send-activation-email.js
-// Vercel/Netlify/Node.js Express compatible API route
+// Vercel API route for sending activation emails securely
 const nodemailer = require('nodemailer');
 
-const GMAIL_USER = 'ptahuntilmylastbreathS@gmail.com';
-const GMAIL_PASS = 'vkftvgnmociaovus';
+const GMAIL_USER = process.env.GMAIL_USER;
+const GMAIL_PASS = process.env.GMAIL_PASS;
 
 module.exports = async (req, res) => {
   if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method not allowed' });
-    return;
+    return res.status(405).json({ error: 'Method not allowed' });
   }
-  const { to, code } = req.body || req.query;
+
+  const { to, code } = req.body;
   if (!to || !code) {
-    res.status(400).json({ error: 'Missing to or code' });
-    return;
+    return res.status(400).json({ error: 'Missing recipient or code' });
   }
+
   const transporter = nodemailer.createTransport({
     service: 'gmail',
-    auth: { user: GMAIL_USER, pass: GMAIL_PASS },
+    auth: {
+      user: GMAIL_USER,
+      pass: GMAIL_PASS,
+    },
   });
+
   const mailOptions = {
-    from: GMAIL_USER,
+    from: `"ptah" <${GMAIL_USER}>`,
     to,
     subject: 'Your PuzLabu Activation Code',
     text: `Your activation code: ${code}\n\nThank you for your purchase!`,
   };
+
   try {
     await transporter.sendMail(mailOptions);
-    res.status(200).json({ success: true });
+    return res.status(200).json({ success: true });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 };

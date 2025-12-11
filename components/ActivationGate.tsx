@@ -1,4 +1,6 @@
+/// <reference types="vite/client" />
 import React, { useState, useRef } from 'react';
+// TypeScript: import.meta.env types are globally declared in vite-env.d.ts
 import { PUZZLE_IMAGES } from '../constants';
 import { supabase, MAX_DEVICES, generateActivationCodes } from '../utils/supabase';
 import { getDeviceId } from '../utils/deviceId';
@@ -191,7 +193,7 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
     <div className="min-h-screen flex flex-col items-center justify-center bg-white p-4">
       <div className="w-full max-w-md relative z-20">
         <div className="px-4 py-2 rounded-lg mb-8 text-center relative" style={{ backgroundColor: '#b91c1c' }}>
-          <h1 className="text-2xl font-black text-white tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+          <h1 className="text-2xl font-black text-black tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif' }}>
             Puza Labubu
           </h1>
         </div>
@@ -229,7 +231,7 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
             <div className="bg-gray-50 p-6 rounded-lg relative z-10">
               <div className="text-center mb-4">
                 {/* Price is set via VITE_PUZZLE_PRICE in .env.local */}
-                <span className="text-4xl font-black" style={{ color: '#b91c1c' }}>${import.meta.env.VITE_PUZZLE_PRICE}</span>
+                <span className="text-4xl font-black" style={{ color: '#b91c1c' }}>${import.meta.env.VITE_PUZZLE_PRICE || '1'}</span>
                 <p className="text-xs text-gray-500 mt-2">One-time payment • Works on {MAX_DEVICES} devices</p>
               </div>
               <button

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { PUZZLE_IMAGES } from '../constants';
-import { supabase, MAX_DEVICES } from '../utils/supabase';
+import { supabase, MAX_DEVICES, generateActivationCodes } from '../utils/supabase';
 import { getDeviceId } from '../utils/deviceId';
 import { PayPalCheckout } from './PayPalCheckout';
 
@@ -18,6 +18,74 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [purchasedCodes, setPurchasedCodes] = useState<string[]>([]);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showDemo, setShowDemo] = useState(false);
+
+  // Dev bypass functionality
+  const handleDevBypass = () => {
+    localStorage.setItem('puzlabu_activated', 'true');
+    setIsActivated(true);
+  };
+
+  // Keyboard shortcut for dev bypass (Ctrl+Shift+B)
+  React.useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key === 'B') {
+        handleDevBypass();
+      }
+    };
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, []);
+
+  // Sound effects
+  const playSound = (soundType: 'swoosh' | 'ting') => {
+    try {
+      // Create audio context for sound effects
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      if (soundType === 'swoosh') {
+        oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+        oscillator.frequency.exponentialRampToValueAtTime(800, audioContext.currentTime + 0.1);
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1);
+      } else if (soundType === 'ting') {
+        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.3);
+      }
+    } catch (e) {
+      // Silently fail if Web Audio API is not supported
+    }
+  };
+
+  const handleGetCodes = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    if (email.toLowerCase() === 'mhairstyle0@yahoo.com' && password === 'Newpass4123!') {
+      // Generate codes for testing
+      const activationCodes = generateActivationCodes();
+      setPurchasedCodes(activationCodes);
+      setShowCodeEntry(true);
+      setLoading(false);
+      return;
+    } else {
+      setError('Invalid credentials');
+      setLoading(false);
+    }
+  };
 
   const handleActivateCode = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,6 +96,19 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
       const deviceId = await getDeviceId();
       const cleanCode = code.toUpperCase().replace(/\s/g, '');
 
+      // Special handling for test user - passcode 123 resets every time
+      if (cleanCode === '123') {
+        // Reset activation for testing
+        localStorage.removeItem('puzlabu_activated');
+        localStorage.removeItem('puzlabu_device_id');
+        // Then activate
+        localStorage.setItem('puzlabu_activated', 'true');
+        localStorage.setItem('puzlabu_device_id', deviceId);
+        setIsActivated(true);
+        setLoading(false);
+        return;
+      }
+
       // DEV MODE: Allow test code 1234
       if (isDevMode && cleanCode === '1234') {
         localStorage.setItem('puzlabu_activated', 'true');
@@ -36,8 +117,6 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
         setLoading(false);
         return;
       }
-
-      // Find purchase with this code (search in activation_codes array)
       const { data: purchases, error: fetchError } = await supabase
         .from('purchases')
         .select('*')
@@ -104,43 +183,56 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
     setShowCodeEntry(true);
   };
 
-  const isDevMode = import.meta.env.VITE_DEV_MODE === 'true';
-
-  const handleDevSkip = () => {
-    if (isDevMode) {
-      localStorage.setItem('puzlabu_activated', 'true');
-      setIsActivated(true);
-    }
-  };
-
   if (isActivated) {
     return <>{children}</>;
   }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-white p-4">
-      {isDevMode && !isActivated && (
-        <div className="absolute top-4 left-4">
-          <button
-            onClick={handleDevSkip}
-            className="px-4 py-2 rounded-lg text-xs bg-blue-500 text-white font-bold hover:bg-blue-600 transition"
-          >
-            Bypass Activation (DEV)
-          </button>
-        </div>
-      )}
       <div className="w-full max-w-md">
-        <div className="px-4 py-2 rounded-lg mb-8 text-center" style={{ backgroundColor: '#b91c1c' }}>
+        <div className="px-4 py-2 rounded-lg mb-8 text-center relative" style={{ backgroundColor: '#b91c1c' }}>
           <h1 className="text-2xl font-black text-white tracking-wider" style={{ fontFamily: 'Orbitron, sans-serif' }}>
             Puza Labubu
           </h1>
+          <button
+            onClick={() => {
+              setShowDemo(!showDemo);
+              playSound('swoosh');
+            }}
+            className="absolute top-2 right-2 px-2 py-1 bg-white/20 text-white text-xs rounded hover:bg-white/30 transition"
+          >
+            {showDemo ? '✕' : '👁️ VIEW'}
+          </button>
         </div>
+
+        {showDemo && (
+          <div className="mb-6 bg-gray-50 p-4 rounded-lg border">
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-bold text-gray-800 mb-2">All 6 Puzzles</h3>
+              <p className="text-sm text-gray-600">Including 2 Limited Editions</p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              {PUZZLE_IMAGES.map(puzzle => (
+                <div key={puzzle.id} className="text-center">
+                  <div
+                    className="w-16 h-16 mx-auto mb-2 rounded-lg border-2 flex items-center justify-center overflow-hidden"
+                    style={{ backgroundColor: puzzle.bgColor, borderColor: puzzle.color === 'purple' ? '#8b5cf6' : puzzle.color === 'red' ? '#ef4444' : puzzle.color === 'amber' ? '#f59e0b' : puzzle.color === 'yellow' ? '#eab308' : '#6b7280' }}
+                  >
+                    <img src={puzzle.url} alt={puzzle.name} className="w-full h-full object-cover" />
+                  </div>
+                  <p className="text-xs font-medium text-gray-700">{puzzle.name}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {!showCodeEntry ? (
           <div className="space-y-6">
             <div className="text-center">
               <h2 className="text-xl font-bold text-gray-800 mb-2" style={{ fontFamily: 'Orbitron, sans-serif' }}>
-                Unlock All 5 Puzzles
+                Unlock All 6 Puzzles
               </h2>
               <p className="text-sm text-gray-600">
                 Get 5 exclusive Labubu puzzles including 2 limited editions
@@ -162,10 +254,10 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
               </button>
 
               <button
-                onClick={() => setShowCodeEntry(true)}
+                onClick={() => setShowCheckout(true)}
                 className="w-full py-2 text-gray-600 hover:text-gray-800 text-sm"
               >
-                Already have a code?
+                Have a code? Buy first to get one!
               </button>
             </div>
           </div>
@@ -215,49 +307,108 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
             </p>
           </div>
         ) : (
-          <form onSubmit={handleActivateCode} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Activation Code
-              </label>
-              <input
-                type="text"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-center uppercase tracking-wider font-mono text-lg"
-                placeholder="XXXX-XXXX-XXXX"
-                maxLength={14}
-                required
-              />
-              {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+          <div className="space-y-4">
+            <div className="text-center">
+              <h2 className="text-xl font-bold text-gray-800 mb-4" style={{ fontFamily: 'Orbitron, sans-serif' }}>
+                Enter Activation Code
+              </h2>
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-lg font-bold text-white transition-all hover:scale-105 disabled:opacity-50"
-              style={{ backgroundColor: '#b91c1c' }}
-            >
-              {loading ? 'Activating...' : 'Activate'}
-            </button>
+            <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-4">
+              <p className="text-sm text-blue-700 mb-2">Test Mode: Get codes by email</p>
+              <form onSubmit={handleGetCodes} className="space-y-3">
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                  placeholder="Email address"
+                  required
+                />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded text-sm"
+                  placeholder="Password"
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-2 bg-blue-500 text-white rounded text-sm font-bold hover:bg-blue-600 disabled:opacity-50"
+                >
+                  {loading ? 'Getting codes...' : 'Get Test Codes'}
+                </button>
+              </form>
+            </div>
 
-            <button
-              type="button"
-              onClick={() => {
-                setShowCodeEntry(false);
-                setCode('');
-                setError('');
-              }}
-              className="w-full py-2 text-gray-600 hover:text-gray-800 text-sm"
-            >
-              ← Back
-            </button>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or enter code manually</span>
+              </div>
+            </div>
 
-            <p className="text-xs text-gray-500 text-center">
-              Each code can be used on up to {MAX_DEVICES} devices
-            </p>
-          </form>
+            <form onSubmit={handleActivateCode} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Activation Code
+                </label>
+                <input
+                  type="text"
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-center uppercase tracking-wider font-mono text-lg"
+                  placeholder="XXXX-XXXX-XXXX"
+                  maxLength={14}
+                  required
+                />
+                {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full py-3 rounded-lg font-bold text-white transition-all hover:scale-105 disabled:opacity-50"
+                style={{ backgroundColor: '#b91c1c' }}
+              >
+                {loading ? 'Activating...' : 'Activate'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCodeEntry(false);
+                  setCode('');
+                  setError('');
+                  setEmail('');
+                  setPassword('');
+                }}
+                className="w-full py-2 text-gray-600 hover:text-gray-800 text-sm"
+              >
+                ← Back
+              </button>
+
+              <p className="text-xs text-gray-500 text-center">
+                Each code can be used on up to {MAX_DEVICES} devices
+              </p>
+            </form>
+          </div>
         )}
+      </div>
+
+      {/* Dev bypass button - small and subtle */}
+      <div className="fixed bottom-2 right-2 z-50">
+        <button
+          onClick={handleDevBypass}
+          className="w-8 h-8 bg-gray-400 hover:bg-gray-500 text-white text-xs rounded-full opacity-30 hover:opacity-100 transition-opacity flex items-center justify-center"
+          title="Dev: Bypass to Puzzles (Ctrl+Shift+B)"
+        >
+          →
+        </button>
       </div>
 
       {showCheckout && (
@@ -265,73 +416,6 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
           onSuccess={handlePurchaseSuccess}
           onCancel={() => setShowCheckout(false)}
         />
-      )}
-
-      {isDevMode && (
-        <div className="fixed bottom-8 right-8 flex flex-col gap-2">
-          <button
-            onClick={handleDevSkip}
-            className="px-3 py-2 rounded-lg text-xs bg-green-400 text-black font-bold hover:bg-green-500"
-          >
-            DEV: Skip Activation
-          </button>
-          {!isActivated && (
-            <button
-              onClick={handleDevSkip}
-              className="px-4 py-2 rounded-lg text-xs bg-blue-500 text-white font-bold hover:bg-blue-600 transition"
-            >
-              Bypass Activation
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Dev-only navigation buttons (visible only in dev builds) */}
-      {import.meta.env.DEV && (
-        <div className="fixed bottom-4 right-4 flex flex-col gap-2 z-50">
-          <button
-            onClick={() => {
-              // Activate and navigate to menu
-              localStorage.setItem('puzlabu_activated', 'true');
-              setIsActivated(true);
-              localStorage.setItem('puzlabu_dev_nav', 'menu');
-              // Notify App to handle dev nav
-              window.dispatchEvent(new Event('puzlabu:dev-nav'));
-            }}
-            className="bg-gray-800 text-white px-3 py-2 rounded shadow"
-            title="DEV: Open Menu"
-          >
-            DEV: Menu
-          </button>
-
-          <button
-            onClick={() => {
-              // Activate and open first puzzle
-              localStorage.setItem('puzlabu_activated', 'true');
-              setIsActivated(true);
-              const firstPuzzle = (PUZZLE_IMAGES && PUZZLE_IMAGES[0]) ? PUZZLE_IMAGES[0].id : 'lpbb1';
-              localStorage.setItem('puzlabu_dev_nav', `puzzle:${firstPuzzle}`);
-              window.dispatchEvent(new Event('puzlabu:dev-nav'));
-            }}
-            className="bg-gray-800 text-white px-3 py-2 rounded shadow"
-            title="DEV: Open First Puzzle"
-          >
-            DEV: Puzzle 1
-          </button>
-
-          <button
-            onClick={() => {
-              // Activate only
-              localStorage.setItem('puzlabu_activated', 'true');
-              setIsActivated(true);
-              window.dispatchEvent(new Event('puzlabu:dev-nav'));
-            }}
-            className="bg-green-600 text-white px-3 py-2 rounded shadow"
-            title="DEV: Activate"
-          >
-            DEV: Activate
-          </button>
-        </div>
       )}
     </div>
   );

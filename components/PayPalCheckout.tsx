@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import { supabase, generateActivationCodes } from '../utils/supabase';
+import { PUZZLE_IMAGES } from '../constants';
 
 interface PayPalCheckoutProps {
   onSuccess: (codes: string[]) => void;
@@ -11,6 +12,41 @@ export const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({ onSuccess, onCan
   const [email, setEmail] = useState('');
   const [showPayPal, setShowPayPal] = useState(false);
   const [error, setError] = useState('');
+  const [floatingImages, setFloatingImages] = useState<Array<{
+    id: number;
+    image: string;
+    x: number;
+    y: number;
+    size: number;
+    speed: number;
+  }>>([]);
+
+  // Generate floating background images
+  useEffect(() => {
+    const images = [];
+    for (let i = 0; i < 8; i++) {
+      images.push({
+        id: i,
+        image: PUZZLE_IMAGES[Math.floor(Math.random() * PUZZLE_IMAGES.length)].url,
+        x: Math.random() * 100,
+        y: Math.random() * 100,
+        size: 20 + Math.random() * 40, // 20-60px
+        speed: 0.5 + Math.random() * 1, // 0.5-1.5
+      });
+    }
+    setFloatingImages(images);
+
+    // Animate floating images
+    const interval = setInterval(() => {
+      setFloatingImages(prev => prev.map(img => ({
+        ...img,
+        y: (img.y + img.speed * 0.1) % 110, // Slowly move down and wrap around
+        x: img.x + Math.sin(Date.now() * 0.001 + img.id) * 0.1, // Gentle horizontal sway
+      })));
+    }, 50);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +68,24 @@ export const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({ onSuccess, onCan
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full">
+      {/* Floating background images */}
+      {floatingImages.map(img => (
+        <img
+          key={img.id}
+          src={img.image}
+          alt=""
+          className="absolute opacity-20 pointer-events-none"
+          style={{
+            left: `${img.x}%`,
+            top: `${img.y}%`,
+            width: `${img.size}px`,
+            height: `${img.size}px`,
+            transform: 'translate(-50%, -50%)',
+          }}
+        />
+      ))}
+
+      <div className="bg-white rounded-lg p-6 max-w-md w-full relative z-10">
         <div className="px-4 py-2 rounded-lg mb-6 text-center" style={{ backgroundColor: '#b91c1c' }}>
           <h2 className="text-xl font-black text-white tracking-wider uppercase" style={{ fontFamily: 'Orbitron, sans-serif' }}>
             Unlock All Puzzles
@@ -58,7 +111,7 @@ export const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({ onSuccess, onCan
 
             <div className="bg-gray-50 p-4 rounded-lg">
               <div className="flex justify-between mb-2">
-                <span className="text-gray-700">5 Puzzles</span>
+                <span className="text-gray-700">6 Puzzles</span>
                 <span className="font-bold">$20.00</span>
               </div>
               <p className="text-xs text-gray-600 mt-2">
@@ -90,6 +143,7 @@ export const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({ onSuccess, onCan
             options={{
               clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID,
               currency: 'USD',
+              environment: 'sandbox', // Enable sandbox mode
             }}
           >
             <div className="space-y-4">
@@ -108,7 +162,7 @@ export const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({ onSuccess, onCan
                           value: '20.00',
                           currency_code: 'USD',
                         },
-                          description: 'Puza Labubu - 5 Puzzles (2 Limited Edition)',
+                          description: 'Puza Labubu - 6 Puzzles (2 Limited Edition)',
                       },
                     ],
                   });

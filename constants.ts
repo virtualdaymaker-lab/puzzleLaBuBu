@@ -5,6 +5,8 @@ import lpbb2 from './images/PuzLabu/lpbb2.png';
 import lbpp3 from './images/PuzLabu/lbpp3.png';
 import lpbb8 from './images/PuzLabu/lpbb8.png';
 import lpbb12 from './images/PuzLabu/lpbb12.png';
+// 6th puzzle image
+import puzalabubu from './images/PuzLabu/1.png';
 
 export const GRID_SIZE = 4;
 export const TOTAL_PIECES = GRID_SIZE * GRID_SIZE;
@@ -44,5 +46,12 @@ export const PUZZLE_IMAGES: PuzzleImage[] = [
     url: lpbb12,
     color: 'amber',
     bgColor: '#efebe9',
+  },
+  {
+    id: 'puzalabubu',
+    name: 'Puza Labubu',
+    url: puzalabubu,
+    color: 'red',
+    bgColor: '#fee2e2',
   },
 ];

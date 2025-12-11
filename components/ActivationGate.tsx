@@ -13,6 +13,7 @@ interface ActivationGateProps {
 }
 
 export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
+      const [showDemoModal, setShowDemoModal] = useState(false);
     // Purchase success handler
     const handlePurchaseSuccess = (activationCodes: string[]) => {
       setShowCheckout(false);
@@ -43,6 +44,52 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
     return (
       <>
         {children}
+        {/* Demo Button */}
+        <div className="flex justify-center items-center mt-8">
+          <button
+            onClick={() => setShowDemoModal(true)}
+            className="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-lg hover:bg-blue-700 transition-all text-lg"
+            style={{ zIndex: 1000 }}
+          >
+            View Puzzle Demo
+          </button>
+        </div>
+        {/* Demo Modal Popup */}
+        {showDemoModal && (
+          <div
+            className="fixed inset-0 flex items-center justify-center z-50"
+            style={{ background: 'rgba(0,0,0,0.6)' }}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-2xl p-6 max-w-2xl w-full relative flex flex-col items-center"
+              style={{ maxHeight: '80vh', overflowY: 'auto' }}
+            >
+              <button
+                onClick={() => setShowDemoModal(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl font-bold"
+                aria-label="Close"
+              >
+                ×
+              </button>
+              <h2 className="text-2xl font-bold mb-4 text-center">Professional Puzzle Demo</h2>
+              <p className="mb-4 text-center text-gray-700">Unlock 5 high-definition puzzles. 2 are <span className="font-bold text-purple-600">Limited Edition</span>. You get <span className="font-bold">2 codes</span> for <span className="font-bold">2 devices</span>.</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                {PUZZLE_IMAGES.slice(0,5).map((img, idx) => (
+                  <div key={img.id} className="flex flex-col items-center bg-gray-50 rounded-xl p-4 shadow-md">
+                    <img src={img.url} alt={img.name} className="w-40 h-40 object-contain rounded-lg mb-2 border-2 border-gray-200" />
+                    <div className="text-lg font-semibold text-gray-800 text-center mb-1">{img.name}</div>
+                    <div className="text-sm text-gray-600 text-center">
+                      {idx === 0 ? '⭐ Limited Edition: Unique puzzle, only available for a short time.' : ''}
+                      {idx === 1 ? '⭐ Limited Edition: Special puzzle, limited access.' : ''}
+                      {idx > 1 ? 'Classic puzzle challenge.' : ''}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Dev Bypass Button */}
         <div className="fixed bottom-2 right-2 z-50">
           <button
             onClick={handleDevBypass}
@@ -229,6 +276,52 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
     return (
       <>
         {children}
+        {/* Demo Button */}
+        <div className="flex justify-center items-center mt-8">
+          <button
+            onClick={() => setShowDemoModal(true)}
+            className="px-6 py-3 bg-blue-600 text-white font-bold rounded-lg shadow-lg hover:bg-blue-700 transition-all text-lg"
+            style={{ zIndex: 1000 }}
+          >
+            View Puzzle Demo
+          </button>
+        </div>
+        {/* Demo Modal Popup */}
+        {showDemoModal && (
+          <div
+            className="fixed inset-0 flex items-center justify-center z-50"
+            style={{ background: 'rgba(0,0,0,0.6)' }}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-2xl p-6 max-w-2xl w-full relative flex flex-col items-center"
+              style={{ maxHeight: '80vh', overflowY: 'auto' }}
+            >
+              <button
+                onClick={() => setShowDemoModal(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 text-2xl font-bold"
+                aria-label="Close"
+              >
+                ×
+              </button>
+              <h2 className="text-2xl font-bold mb-4 text-center">Professional Puzzle Demo</h2>
+              <p className="mb-4 text-center text-gray-700">Unlock 5 high-definition puzzles. 2 are <span className="font-bold text-purple-600">Limited Edition</span>. You get <span className="font-bold">2 codes</span> for <span className="font-bold">2 devices</span>.</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                {PUZZLE_IMAGES.slice(0,5).map((img, idx) => (
+                  <div key={img.id} className="flex flex-col items-center bg-gray-50 rounded-xl p-4 shadow-md">
+                    <img src={img.url} alt={img.name} className="w-40 h-40 object-contain rounded-lg mb-2 border-2 border-gray-200" />
+                    <div className="text-lg font-semibold text-gray-800 text-center mb-1">{img.name}</div>
+                    <div className="text-sm text-gray-600 text-center">
+                      {idx === 0 ? '⭐ Limited Edition: Unique puzzle, only available for a short time.' : ''}
+                      {idx === 1 ? '⭐ Limited Edition: Special puzzle, limited access.' : ''}
+                      {idx > 1 ? 'Classic puzzle challenge.' : ''}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Dev Bypass Button */}
         <div className="fixed bottom-2 right-2 z-50">
           <button
             onClick={handleDevBypass}
@@ -262,8 +355,8 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
         )}
       </>
     );
-      // end main wrapper
-    }
+    // end main wrapper
+  }
   }
 
 

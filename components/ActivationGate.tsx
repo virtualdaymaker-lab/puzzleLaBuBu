@@ -98,8 +98,9 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
       const cleanCode = code.toUpperCase().replace(/\s/g, '');
       const userEmail = email.trim().toLowerCase();
 
-      // Special handling for test user - passcode 123 resets every time
-      if (cleanCode === '123') {
+      // Special handling for test user - passcode 123 resets every time (dev only)
+      const isDevMode = typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_DEV_MODE === 'true';
+      if (isDevMode && cleanCode === '123') {
         localStorage.removeItem('puzlabu_activated');
         localStorage.removeItem('puzlabu_device_id');
         localStorage.setItem('puzlabu_activated', 'true');
@@ -110,7 +111,6 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
       }
 
       // DEV MODE: Allow test code 1234
-      const isDevMode = typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_DEV_MODE === 'true';
       if (isDevMode && cleanCode === '1234') {
         localStorage.setItem('puzlabu_activated', 'true');
         localStorage.setItem('puzlabu_device_id', deviceId);

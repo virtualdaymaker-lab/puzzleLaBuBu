@@ -68,6 +68,8 @@ function App() {
   }, []);
 
   // Always show ActivationGate only, never puzzles directly
+  const isDevMode = import.meta.env.VITE_DEV_MODE === 'true';
+
   return (
     <ActivationGate>
       <div className="min-h-screen flex flex-col items-center bg-white">
@@ -100,6 +102,34 @@ function App() {
             />
           )}
         </main>
+        {/* Temporary navigation arrows at the bottom (dev only) */}
+        {isDevMode && (
+          <div className="fixed bottom-3 left-0 w-full flex justify-center items-center pointer-events-auto z-50">
+          <button
+            className="mx-2 p-1 bg-gray-100 rounded-full shadow text-xs text-gray-500 hover:bg-gray-200"
+            style={{ width: 28, height: 28 }}
+            aria-label="Go to menu"
+            onClick={() => setCurrentView('menu')}
+            disabled={currentView === 'menu'}
+          >
+            <span style={{ fontSize: '1.2em' }}>&larr;</span>
+          </button>
+          <button
+            className="mx-2 p-1 bg-gray-100 rounded-full shadow text-xs text-gray-500 hover:bg-gray-200"
+            style={{ width: 28, height: 28 }}
+            aria-label="Go to puzzle"
+            onClick={() => {
+              if (PUZZLE_IMAGES.length > 0) {
+                setActivePuzzle(PUZZLE_IMAGES[0]);
+                setCurrentView('puzzle');
+              }
+            }}
+            disabled={currentView === 'puzzle'}
+          >
+            <span style={{ fontSize: '1.2em' }}>&rarr;</span>
+          </button>
+          </div>
+        )}
         <footer className="w-full text-center py-6 text-gray-400 font-medium text-sm tracking-widest uppercase">
           <p className="text-gray-300">Collect All Units</p>
         </footer>

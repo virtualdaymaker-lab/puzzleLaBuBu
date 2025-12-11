@@ -517,7 +517,7 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
             <div className="bg-gray-50 p-6 rounded-lg relative z-10">
               <div className="text-center mb-4">
                 {/* Price is set via VITE_PUZZLE_PRICE in .env.local */}
-                <span className="text-4xl font-black" style={{ color: '#b91c1c' }}>${import.meta.env.VITE_PUZZLE_PRICE}</span>
+                <span className="text-4xl font-black" style={{ color: '#b91c1c' }}>${import.meta.env.VITE_PUZZLE_PRICE || '1'}</span>
                 <p className="text-xs text-gray-500 mt-2">One-time payment • Works on {MAX_DEVICES} devices</p>
               </div>
 

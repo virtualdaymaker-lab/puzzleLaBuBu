@@ -10,6 +10,7 @@ type View = 'menu' | 'puzzle';
 function App() {
   const [activePuzzle, setActivePuzzle] = useState<PuzzleImage | null>(null);
   const [currentView, setCurrentView] = useState<View>('menu');
+    const fallbackPrice = 1; // Changed from 20 to 1 dollar
 
   const handleSelectPuzzle = (img: PuzzleImage) => {
     setActivePuzzle(img);

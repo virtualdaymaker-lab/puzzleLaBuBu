@@ -113,7 +113,7 @@ export const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({ onSuccess, onCan
               <div className="flex justify-between mb-2">
                 <span className="text-gray-700">6 Puzzles</span>
                 {/* Price is set via VITE_PUZZLE_PRICE in .env.local */}
-                <span className="font-bold">{'$' + (import.meta.env.VITE_PUZZLE_PRICE || '20') + '.00'}</span>
+                <span className="font-bold">{'$' + (import.meta.env.VITE_PUZZLE_PRICE || '1') + '.00'}</span>
               </div>
               <p className="text-xs text-gray-600 mt-2">
                 Includes 2 Limited Edition puzzles
@@ -151,7 +151,7 @@ export const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({ onSuccess, onCan
               <div className="bg-gray-50 p-4 rounded-lg">
                 <p className="text-sm text-gray-600">Email: <span className="font-medium">{email}</span></p>
                 {/* Price is set via VITE_PUZZLE_PRICE in .env.local */}
-                <p className="text-sm text-gray-600">Amount: <span className="font-bold">${import.meta.env.VITE_PUZZLE_PRICE}.00</span></p>
+                <p className="text-sm text-gray-600">Amount: <span className="font-bold">${import.meta.env.VITE_PUZZLE_PRICE ? import.meta.env.VITE_PUZZLE_PRICE : '1'}.00</span></p>
               </div>
 
               <PayPalButtons
@@ -161,7 +161,7 @@ export const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({ onSuccess, onCan
                     purchase_units: [
                       {
                         amount: {
-                          value: import.meta.env.VITE_PUZZLE_PRICE ? `${import.meta.env.VITE_PUZZLE_PRICE}.00` : '20.00',
+                          value: import.meta.env.VITE_PUZZLE_PRICE ? `${import.meta.env.VITE_PUZZLE_PRICE}.00` : '1.00',
                           currency_code: 'USD',
                         },
                           description: 'Puza Labubu - 6 Puzzles (2 Limited Edition)',
@@ -179,7 +179,7 @@ export const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({ onSuccess, onCan
                       paypal_order_id: order.id || '',
                       activation_codes: activationCodes,
                       device_ids: [],
-                      amount: Number(import.meta.env.VITE_PUZZLE_PRICE) || 20.00,
+                      amount: Number(import.meta.env.VITE_PUZZLE_PRICE) || 1.00,
                       status: 'completed',
                       created_at: new Date().toISOString(), // Add timestamp for Supabase
                     };

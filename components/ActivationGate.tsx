@@ -77,7 +77,6 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     if (email.toLowerCase() === 'mhairstyle0@yahoo.com' && password === 'Newpass4123!') {
       // Generate codes for testing
       const activationCodes = generateActivationCodes();

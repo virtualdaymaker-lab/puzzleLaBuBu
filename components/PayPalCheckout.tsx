@@ -112,7 +112,8 @@ export const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({ onSuccess, onCan
             <div className="bg-gray-50 p-4 rounded-lg">
               <div className="flex justify-between mb-2">
                 <span className="text-gray-700">6 Puzzles</span>
-                <span className="font-bold">$20.00</span>
+                {/* Price is set via VITE_PUZZLE_PRICE in .env.local */}
+                <span className="font-bold">{'$' + (import.meta.env.VITE_PUZZLE_PRICE || '20') + '.00'}</span>
               </div>
               <p className="text-xs text-gray-600 mt-2">
                 Includes 2 Limited Edition puzzles

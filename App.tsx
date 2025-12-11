@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { PuzzleMenu } from './components/PuzzleMenu';
-import { PuzzleBoard } from './components/PuzzleBoard';
 import { ActivationGate } from './components/ActivationGate';
 import { PUZZLE_IMAGES } from './constants';
 import { PuzzleImage } from './types';
+import { PuzzleBoard } from './components/PuzzleBoard';
+import { PuzzleMenu } from './components/PuzzleMenu';
 
 type View = 'menu' | 'puzzle';
 
@@ -67,13 +67,12 @@ function App() {
     return () => window.removeEventListener('puzlabu:dev-nav', handler);
   }, []);
 
+  // Always show ActivationGate only, never puzzles directly
   return (
     <ActivationGate>
       <div className="min-h-screen flex flex-col items-center bg-white">
-        {/* Header / Title Bar */}
         <header className="w-full bg-white border-b border-gray-100 sticky top-0 z-40">
           <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-center">
-            {/* Logo */}
             <div 
               className="px-5 py-2.5 rounded-lg cursor-pointer shadow-lg hover:shadow-xl transition-shadow"
               style={{ backgroundColor: '#b91c1c' }}
@@ -88,8 +87,7 @@ function App() {
             </div>
           </div>
         </header>
-
-        {/* Main Content Area */}
+        {/* Main Content Area: Show puzzles and menu, ActivationGate will handle blocking if not activated */}
         <main className="flex-1 w-full p-4 flex flex-col justify-start pt-8">
           {currentView === 'puzzle' && activePuzzle ? (
             <PuzzleBoard 
@@ -102,8 +100,6 @@ function App() {
             />
           )}
         </main>
-
-        {/* Footer */}
         <footer className="w-full text-center py-6 text-gray-400 font-medium text-sm tracking-widest uppercase">
           <p className="text-gray-300">Collect All Units</p>
         </footer>

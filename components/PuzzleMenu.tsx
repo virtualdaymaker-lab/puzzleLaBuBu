@@ -44,7 +44,6 @@ export const PuzzleMenu: React.FC<PuzzleMenuProps> = ({ onSelect }) => {
                   onError={() => handleImageError(img.id)}
                 />
               )}
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/5 transition-colors" />
             </div>
             
             <span className="text-sm md:text-base font-bold text-white group-hover:text-white/90 transition-colors text-center leading-tight tracking-wide uppercase z-10">

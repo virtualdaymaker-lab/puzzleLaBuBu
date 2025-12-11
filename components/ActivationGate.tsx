@@ -13,6 +13,12 @@ interface ActivationGateProps {
 }
 
 export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
+    // Purchase success handler
+    const handlePurchaseSuccess = (activationCodes: string[]) => {
+      setShowCheckout(false);
+      setPurchasedCodes(activationCodes);
+      setShowCodeEntry(true);
+    };
   const [isActivated, setIsActivated] = useState(
     localStorage.getItem('puzlabu_activated') === 'true'
   );
@@ -25,13 +31,53 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showDemo, setShowDemo] = useState(false);
-
   // Dev bypass functionality
   const handleDevBypass = () => {
     localStorage.setItem('puzlabu_activated', 'true');
     setIsActivated(true);
   };
 
+  // Purchase success handler
+
+  if (isActivated) {
+    return (
+      <>
+        {children}
+        <div className="fixed bottom-2 right-2 z-50">
+          <button
+            onClick={handleDevBypass}
+            className="w-8 h-8 bg-gray-400 hover:bg-gray-500 text-white text-xs rounded-full opacity-30 hover:opacity-100 transition-opacity flex items-center justify-center"
+            title="Dev: Bypass to Puzzles (Ctrl+Shift+B)"
+          >
+            →
+          </button>
+        </div>
+        {showCheckout && (
+          <div
+            style={{
+              zIndex: 9999,
+              position: 'fixed',
+              inset: 0,
+              background: '#fff',
+              overflowY: 'auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '2rem',
+            }}
+          >
+            <div style={{ width: '100%', maxWidth: 400 }}>
+              <PayPalCheckout
+                onSuccess={handlePurchaseSuccess}
+                onCancel={() => setShowCheckout(false)}
+              />
+            </div>
+          </div>
+        )}
+      </>
+    );
+    // end main wrapper
+  }
   // Keyboard shortcut for dev bypass (Ctrl+Shift+B)
   React.useEffect(() => {
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -178,47 +224,47 @@ export const ActivationGate: React.FC<ActivationGateProps> = ({ children }) => {
     setLoading(false);
   };
 
-  const handlePurchaseSuccess = (activationCodes: string[]) => {
-    setShowCheckout(false);
-    setPurchasedCodes(activationCodes);
-    setShowCodeEntry(true);
-  };
 
   if (isActivated) {
-    return <>{children}</>;
-      <div className="fixed bottom-2 right-2 z-50">
-        <button
-          onClick={handleDevBypass}
-          className="w-8 h-8 bg-gray-400 hover:bg-gray-500 text-white text-xs rounded-full opacity-30 hover:opacity-100 transition-opacity flex items-center justify-center"
-          title="Dev: Bypass to Puzzles (Ctrl+Shift+B)"
-        >
-          →
-        </button>
-      </div>
-
-      {showCheckout && (
-        <div
-          style={{
-            zIndex: 9999,
-            position: 'fixed',
-            inset: 0,
-            background: '#fff',
-            overflowY: 'auto',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '2rem',
-          }}
-        >
-          <div style={{ width: '100%', maxWidth: 400 }}>
-            <PayPalCheckout
-              onSuccess={handlePurchaseSuccess}
-              onCancel={() => setShowCheckout(false)}
-            />
-          </div>
+    return (
+      <>
+        {children}
+        <div className="fixed bottom-2 right-2 z-50">
+          <button
+            onClick={handleDevBypass}
+            className="w-8 h-8 bg-gray-400 hover:bg-gray-500 text-white text-xs rounded-full opacity-30 hover:opacity-100 transition-opacity flex items-center justify-center"
+            title="Dev: Bypass to Puzzles (Ctrl+Shift+B)"
+          >
+            →
+          </button>
         </div>
-      )}
-    // end main wrapper
+        {showCheckout && (
+          <div
+            style={{
+              zIndex: 9999,
+              position: 'fixed',
+              inset: 0,
+              background: '#fff',
+              overflowY: 'auto',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '2rem',
+            }}
+          >
+            <div style={{ width: '100%', maxWidth: 400 }}>
+              <PayPalCheckout
+                onSuccess={handlePurchaseSuccess}
+                onCancel={() => setShowCheckout(false)}
+              />
+            </div>
+          </div>
+        )}
+      </>
+    );
+      // end main wrapper
+    }
+  }
 
 
 

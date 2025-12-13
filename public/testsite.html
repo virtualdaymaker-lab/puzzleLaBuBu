@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PuzLabu — Test Site</title>
+  <style>
+    :root{--bg:#f8fafc;--card:#fff;--accent:#b91c1c}
+    body{font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;margin:0;background:var(--bg);color:#111}
+    .wrap{max-width:960px;margin:28px auto;padding:18px}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+    h1{margin:0;font-size:20px;letter-spacing:.04em}
+    .nav{display:flex;gap:8px}
+    .btn{padding:8px 12px;border-radius:8px;border:1px solid #e6e6e6;background:#fff;cursor:pointer}
+    .btn.primary{background:var(--accent);color:#fff;border-color:rgba(0,0,0,0.05)}
+    .panel{background:var(--card);border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+    .meta{display:flex;gap:12px;align-items:center}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+    .card{height:92px;border-radius:10px;background:#f3f4f6;display:flex;align-items:center;justify-content:center;font-size:28px;cursor:pointer;user-select:none}
+    .card.flipped{background:#fff}
+    .small{font-size:14px;color:#666}
+    .stats .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0f0}
+    footer{margin-top:18px;text-align:center;color:#888;font-size:13px}
+    @media(max-width:520px){.grid{grid-template-columns:repeat(2,1fr)}.card{height:76px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>PuzLabu — Memory Match (Static)</h1>
+      <div class="nav">
+        <button id="playBtn" class="btn primary">Play</button>
+        <button id="statsBtn" class="btn">Stats</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="play" class="panel">
+        <div class="meta">
+          <div class="small">Moves: <strong id="moves">0</strong></div>
+          <div class="small">Time: <strong id="time">0s</strong></div>
+          <div style="margin-left:auto"><button id="reset" class="btn">Reset</button></div>
+        </div>
+
+        <div id="board" class="grid" aria-live="polite"></div>
+      </section>
+
+      <section id="stats" class="panel" style="display:none;margin-top:12px">
+        <h3>Stats</h3>
+        <div class="stats">
+          <div class="row"><div>Best Moves</div><div id="bestMoves">—</div></div>
+          <div class="row"><div>Best Time</div><div id="bestTime">—</div></div>
+          <div style="padding-top:10px"><button id="clearBest" class="btn">Clear Best</button></div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Static test site — open this file directly in your browser: <code>public/testsite.html</code>
+    </footer>
+  </div>
+
+  <script>
+    (function(){
+      const EMOJI = ['🍎','🍌','🍇','🍓','🍍','🥝'];
+      const boardEl = document.getElementById('board');
+      const movesEl = document.getElementById('moves');
+      const timeEl = document.getElementById('time');
+      const bestMovesEl = document.getElementById('bestMoves');
+      const bestTimeEl = document.getElementById('bestTime');
+      const playBtn = document.getElementById('playBtn');
+      const statsBtn = document.getElementById('statsBtn');
+      const playSec = document.getElementById('play');
+      const statsSec = document.getElementById('stats');
+      const resetBtn = document.getElementById('reset');
+      const clearBest = document.getElementById('clearBest');
+
+      let cards = [];
+      let flipped = [];
+      let moves = 0;
+      let seconds = 0;
+      let timer = null;
+
+      function shuffle(a){
+        for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a
+      }
+
+      function makeBoard(){
+        const doubled = EMOJI.concat(EMOJI).slice(0, EMOJI.length*2);
+        cards = shuffle(doubled.map((v,i)=>({id:i+'-'+v,value:v,matched:false})));
+        flipped = [];
+        moves = 0; seconds = 0;
+        movesEl.textContent = '0'; timeEl.textContent = '0s';
+        render();
+        if(timer){clearInterval(timer);timer=null}
+      }
+
+      function render(){
+        boardEl.innerHTML='';
+        cards.forEach(c=>{
+          const b = document.createElement('button');
+          b.className = 'card'+(c.matched||flipped.includes(c.id)?' flipped':'');
+          b.textContent = (c.matched||flipped.includes(c.id))?c.value:'❓';
+          b.onclick = ()=> onCardClick(c.id);
+          b.disabled = c.matched || flipped.includes(c.id);
+          boardEl.appendChild(b);
+        });
+      }
+
+      function startTimer(){
+        if(timer) return;
+        timer = setInterval(()=>{seconds++; timeEl.textContent = seconds+'s'},1000);
+      }
+
+      function onCardClick(id){
+        if(!timer) startTimer();
+        if(flipped.includes(id)) return;
+        if(flipped.length===2) return;
+        flipped.push(id); render();
+        if(flipped.length===2){
+          moves++; movesEl.textContent = ''+moves;
+          const a = cards.find(c=>c.id===flipped[0]);
+          const b = cards.find(c=>c.id===flipped[1]);
+          if(a.value===b.value){
+            setTimeout(()=>{cards.forEach(c=>{ if(c.value===a.value) c.matched=true }); flipped=[]; render(); checkWin()},300);
+          } else {
+            setTimeout(()=>{flipped=[]; render()},600);
+          }
+        }
+      }
+
+      function checkWin(){
+        if(cards.every(c=>c.matched)){
+          if(timer){clearInterval(timer);timer=null}
+          // save best
+          const prev = JSON.parse(localStorage.getItem('pz_best')||'null');
+          const record = { moves, seconds };
+          if(!prev || moves<prev.moves || (moves===prev.moves && seconds<prev.seconds)){
+            localStorage.setItem('pz_best', JSON.stringify(record));
+            updateBest();
+            alert('New best! Moves:'+moves+' Time:'+seconds+'s');
+          } else {
+            alert('You won! Moves:'+moves+' Time:'+seconds+'s');
+          }
+        }
+      }
+
+      function updateBest(){
+        const b = JSON.parse(localStorage.getItem('pz_best')||'null');
+        bestMovesEl.textContent = b?b.moves:'—';
+        bestTimeEl.textContent = b?b.seconds+'s':'—';
+      }
+
+      playBtn.onclick = ()=>{ playSec.style.display='block'; statsSec.style.display='none'; }
+      statsBtn.onclick = ()=>{ playSec.style.display='none'; statsSec.style.display='block'; updateBest(); }
+      resetBtn.onclick = ()=> makeBoard();
+      clearBest.onclick = ()=>{ localStorage.removeItem('pz_best'); updateBest(); }
+
+      // init
+      makeBoard(); updateBest();
+    })();
+  </script>
+</body>
+</html>

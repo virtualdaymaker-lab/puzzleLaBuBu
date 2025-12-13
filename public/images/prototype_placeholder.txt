@@ -1,0 +1,10 @@
+This is a placeholder for a prototype JPEG. Please use a design tool like Figma to create detailed UI mockups based on your app's screens and components.
+
+Screens to include:
+- Activation Screen
+- Puzzle Menu
+- Puzzle Board
+- Payment/Checkout
+- Success/Confetti
+
+For https://www.youtube.com/watch?v=OroDNJl-pycbest results, export your designs as JPEG frhttps://www.youtube.com/watch?v=pDjveb2LfEoom Figma or another design tool.

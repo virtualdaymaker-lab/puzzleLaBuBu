@@ -219,7 +219,7 @@ export const PuzzleBoard: React.FC<PuzzleBoardProps> = ({ image, onBack }) => {
         {/* Victory Overlay */}
         {isSolved && (
           <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/95 rounded-lg backdrop-blur-md animate-fade-in border border-red-500/30">
-            <h3 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-500 mb-2 tracking-wider uppercase">
+            <h3 className="text-4xl md:text-5xl font-extrabold text-transparent bg-clip-text bg-linear-to-r from-red-500 to-orange-500 mb-2 tracking-wider uppercase">
               Unit Complete
             </h3>
             <p className="text-red-500 text-xl mb-6 tracking-widest">{moves} MOVES</p>

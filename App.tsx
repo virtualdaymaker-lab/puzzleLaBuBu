@@ -4,13 +4,17 @@ import { PUZZLE_IMAGES } from './constants';
 import { PuzzleImage } from './types';
 import { PuzzleBoard } from './components/PuzzleBoard';
 import { PuzzleMenu } from './components/PuzzleMenu';
+import PageOne from './components/pages/PageOne';
+import PageTwo from './components/pages/PageTwo';
+import TestGame from './components/TestGame/TestGame';
+import SideNav from './components/SideNav';
 
-type View = 'menu' | 'puzzle';
+type View = 'page1' | 'page2' | 'menu' | 'puzzle' | 'testgame';
 
 function App() {
+  // App state: menu or puzzle
   const [activePuzzle, setActivePuzzle] = useState<PuzzleImage | null>(null);
-  const [currentView, setCurrentView] = useState<View>('menu');
-    const fallbackPrice = 1; // Changed from 20 to 1 dollar
+  const [currentView, setCurrentView] = useState<View>('testgame');
 
   const handleSelectPuzzle = (img: PuzzleImage) => {
     setActivePuzzle(img);
@@ -22,64 +26,62 @@ function App() {
     setCurrentView('menu');
   };
 
-  // Dev-only: allow a quick navigator via localStorage for development
+  // Expose a global debug API so debug toolbar can switch views even when ActivationGate
+  // has bypassed activation. Use `window.setPuzView(view, puzzleId?)` or dispatch
+  // a CustomEvent `puzlabu-debug` with { action: 'setView', view, puzzleId }.
   React.useEffect(() => {
-    try {
-      const devNav = localStorage.getItem('puzlabu_dev_nav');
-      if (!devNav) return;
-      if (devNav === 'menu') {
+    (window as any).setPuzView = (view: View, puzzleId?: string | null) => {
+      if (view === 'testgame') {
+        setActivePuzzle(null);
+        setCurrentView('testgame');
+        return;
+      }
+      if (view === 'page1') {
+        setActivePuzzle(null);
+        setCurrentView('page1');
+      } else if (view === 'page2') {
+        setActivePuzzle(null);
+        setCurrentView('page2');
+      } else if (view === 'menu') {
         setActivePuzzle(null);
         setCurrentView('menu');
-      } else if (devNav.startsWith('puzzle:')) {
-        const id = devNav.split(':')[1];
-        const img = PUZZLE_IMAGES.find(i => i.id === id) || PUZZLE_IMAGES[0];
-        setActivePuzzle(img);
-        setCurrentView('puzzle');
-      }
-      // Clear after use
-      localStorage.removeItem('puzlabu_dev_nav');
-    } catch (e) {
-      // no-op
-    }
-  }, []);
-
-  // Listen for dev nav events emitted by the ActivationGate (dev-only)
-  React.useEffect(() => {
-    const handler = () => {
-      try {
-        const devNav = localStorage.getItem('puzlabu_dev_nav');
-        if (!devNav) return;
-        if (devNav === 'menu') {
-          setActivePuzzle(null);
-          setCurrentView('menu');
-        } else if (devNav.startsWith('puzzle:')) {
-          const id = devNav.split(':')[1];
-          const img = PUZZLE_IMAGES.find(i => i.id === id) || PUZZLE_IMAGES[0];
-          setActivePuzzle(img);
-          setCurrentView('puzzle');
+      } else if (view === 'puzzle') {
+        if (puzzleId) {
+          const img = PUZZLE_IMAGES.find(i => i.id === puzzleId) || PUZZLE_IMAGES[0] || null;
+          setActivePuzzle(img as any);
         }
-        localStorage.removeItem('puzlabu_dev_nav');
-      } catch (e) {
-        // no-op
+        setCurrentView('puzzle');
       }
     };
 
-    window.addEventListener('puzlabu:dev-nav', handler);
-    return () => window.removeEventListener('puzlabu:dev-nav', handler);
+    const handler = (e: Event) => {
+      try {
+        const detail = (e as CustomEvent).detail || {};
+        if (detail.action === 'setView') {
+          const view = detail.view as View;
+          const puzzleId = detail.puzzleId as string | undefined;
+          (window as any).setPuzView(view, puzzleId);
+        }
+      } catch (err) {}
+    };
+
+    window.addEventListener('puzlabu-debug', handler as EventListener);
+    return () => window.removeEventListener('puzlabu-debug', handler as EventListener);
   }, []);
 
-  // Always show ActivationGate only, never puzzles directly
-  const isDevMode = import.meta.env.VITE_DEV_MODE === 'true';
+
+
 
   return (
-    <ActivationGate>
-      <div className="min-h-screen flex flex-col items-center bg-white">
+    <div className="min-h-screen flex flex-row bg-white">
+      <SideNav />
+      <div className="flex-1 flex flex-col items-center">
         <header className="w-full bg-white border-b border-gray-100 sticky top-0 z-40">
           <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-center">
             <div 
               className="px-5 py-2.5 rounded-lg cursor-pointer shadow-lg hover:shadow-xl transition-shadow"
               style={{ backgroundColor: '#b91c1c' }}
-              onClick={() => handleBack()}
+              onClick={() => { try { (window as any).setPuzView && (window as any).setPuzView('testgame'); } catch { setCurrentView('testgame'); } }}
             >
               <h1 
                 className="text-xl md:text-2xl font-black text-white tracking-wider" 
@@ -90,52 +92,30 @@ function App() {
             </div>
           </div>
         </header>
-        {/* Main Content Area: Show puzzles and menu, ActivationGate will handle blocking if not activated */}
+        {/* Main Content Area: Show puzzles and menu. ActivationGate renders overlays but does not block navigation. */}
         <main className="flex-1 w-full p-4 flex flex-col justify-start pt-8">
           {currentView === 'puzzle' && activePuzzle ? (
             <PuzzleBoard 
               image={activePuzzle} 
               onBack={handleBack} 
             />
+          ) : currentView === 'page2' ? (
+            <PageTwo />
+          ) : currentView === 'testgame' ? (
+            <TestGame />
+          ) : currentView === 'page3' ? (
+            <PageThree />
           ) : (
-            <PuzzleMenu 
-              onSelect={handleSelectPuzzle} 
-            />
+            <PageOne onSelect={handleSelectPuzzle} />
           )}
         </main>
-        {/* Temporary navigation arrows at the bottom (dev only) */}
-        {isDevMode && (
-          <div className="fixed bottom-3 left-0 w-full flex justify-center items-center pointer-events-auto z-50">
-          <button
-            className="mx-2 p-1 bg-gray-100 rounded-full shadow text-xs text-gray-500 hover:bg-gray-200"
-            style={{ width: 28, height: 28 }}
-            aria-label="Go to menu"
-            onClick={() => setCurrentView('menu')}
-            disabled={currentView === 'menu'}
-          >
-            <span style={{ fontSize: '1.2em' }}>&larr;</span>
-          </button>
-          <button
-            className="mx-2 p-1 bg-gray-100 rounded-full shadow text-xs text-gray-500 hover:bg-gray-200"
-            style={{ width: 28, height: 28 }}
-            aria-label="Go to puzzle"
-            onClick={() => {
-              if (PUZZLE_IMAGES.length > 0) {
-                setActivePuzzle(PUZZLE_IMAGES[0]);
-                setCurrentView('puzzle');
-              }
-            }}
-            disabled={currentView === 'puzzle'}
-          >
-            <span style={{ fontSize: '1.2em' }}>&rarr;</span>
-          </button>
-          </div>
-        )}
+        {/* Floating navigation removed (back handled by header) */}
         <footer className="w-full text-center py-6 text-gray-400 font-medium text-sm tracking-widest uppercase">
           <p className="text-gray-300">Collect All Units</p>
         </footer>
       </div>
-    </ActivationGate>
+      <ActivationGate />
+    </div>
   );
 }
 

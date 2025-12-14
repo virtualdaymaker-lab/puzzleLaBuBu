@@ -103,8 +103,6 @@ function App() {
             <PageTwo />
           ) : currentView === 'testgame' ? (
             <TestGame />
-          ) : currentView === 'page3' ? (
-            <PageThree />
           ) : (
             <PageOne onSelect={handleSelectPuzzle} />
           )}

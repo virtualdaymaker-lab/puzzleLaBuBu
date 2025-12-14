@@ -52,6 +52,6 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.listen(PORT, '127.0.0.1', () => {
-  console.log(`Static server running at http://localhost:${PORT}/ (serving ${PUBLIC})`);
+server.listen(PORT, () => {
+  console.log(`Static server running on port ${PORT} (serving ${PUBLIC})`);
 });

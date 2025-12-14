@@ -144,7 +144,7 @@ export const PayPalCheckout: React.FC<PayPalCheckoutProps> = ({ onSuccess, onCan
             options={{
               clientId: import.meta.env.VITE_PAYPAL_CLIENT_ID,
               currency: 'USD',
-              environment: 'sandbox', // Enable sandbox mode
+              
             }}
           >
             <div className="space-y-4">
